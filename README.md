@@ -1,71 +1,29 @@
-# Practical lesson pz-SOLID  
-# Практична реалізація SOLID принципів  
+# 🛡️ Практична реалізація SOLID: Система кібербезпеки (SOAR)
 
-> У цьому занятті студенти отримують практичні навички застосування SOLID принципів під час рефакторингу існуючого коду.  
-> Мета — створити гнучку, масштабовану та чисту архітектуру шляхом застосування SRP, OCP, LSP, ISP та DIP.
-
----
-
-## What need to do:
-* Провести аналіз вихідного «анти-SOLID» коду  
-* Визначити порушення кожного SOLID принципу  
-* Виконати рефакторинг згідно з:
-  * SRP — Single Responsibility Principle  
-  * OCP — Open/Closed Principle  
-  * LSP — Liskov Substitution Principle  
-  * ISP — Interface Segregation Principle  
-  * DIP — Dependency Inversion Principle  
-* Створити відповідні інтерфейси й абстракції  
-* Усунути зайві або циклічні залежності  
-* Додати мінімальний набір unit-тестів після рефакторингу  
+## Опис проєкту
+Цей проєкт ілюструє застосування принципів SOLID до архітектури системи реагування на кіберінциденти (Security Orchestration, Automation, and Response). Мета — зробити систему адаптивною до нових векторів атак без ризику зламати існуючу логіку захисту.
 
 ---
 
-## Acceptance criteria
-* Реалізація на мові Typescript 
-* Студент розуміє кожен SOLID принцип та пояснює його застосування  
-* Увесь вихідний код проаналізовано  
-* Усі порушення SOLID знайдено та описано  
-* Після рефакторингу:
-  * Кожен клас має одну відповідальність (SRP)  
-  * Код розширюється через нові класи, а не редагування існуючих (OCP)  
-  * Класи-нащадки повністю заміщають базові (LSP)  
-  * Інтерфейси невеликі й специфічні (ISP)  
-  * Залежності реалізовані через абстракції (DIP)  
-* Код структурований, логічний та зрозумілий  
-* Усі тести проходять успішно  
-* Звіт оформлений у Markdown (README.md)
+## 🛠 Аналіз порушень та рефакторинг
 
-## Directory Structure
-```
-├── pz-SOLID
-│   ├── src
-│   │   ├── original          # код із навмисними порушеннями SOLID
-│   │   ├── refactored        # код після рефакторингу
-│   │   ├── interfaces        # абстракції та інтерфейси
-│   ├── tests
-│   │   ├── refactored.spec.js
-│   ├── .editorconfig
-│   ├── .gitignore
-│   ├── jest.config.js
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── README.md
-└──
-```
+У початковому анти-патерні (`src/original/badIncidentResponse.ts`) було допущено критичні помилки проєктування:
 
-## Useful links
+| Принцип | Виявлена проблема (Анти-патерн) | Рішення після рефакторингу |
+| :--- | :--- | :--- |
+| **SRP** | `BadSecurityManager` містив логіку блокування, аналізу інцидентів та створення тікетів у Jira. | Створено `SoarOrchestrator`, який лише координує. Робота з фаєрволом та тікетами винесена в окремі сервіси інфраструктури. |
+| **OCP** | Метод `handleIncident` базувався на жорсткому ланцюжку `if-else` (`DDoS`, `Malware`). | Використано поліморфізм. Кожна загроза імплементує метод `executePlaybook()`. Додавання захисту від SQL Injection не вимагатиме зміни ядра системи. |
+| **LSP** | Клас `PhishingIncident` ламав базовий контракт, викидаючи `Error` при виклику `blockIpAddress()`. | Створено базовий клас `CyberThreat`. Специфічні методи (як от блокування IP) винесені в окремі інтерфейси. |
+| **ISP** | Гігантський інтерфейс `IThreatMitigation` змушував фішингові листи реалізовувати методи блокування IP. | Інтерфейси розділено за векторами: `INetworkBlockable`, `IFileQuarantinable`, `IEmailRemovable`. |
+| **DIP** | Жорстка прив'язка до `CiscoFirewallApi` та `JiraTicketing` всередині класу. | `SoarOrchestrator` працює через абстракції `IFirewallService` та `ITicketingSystem`, що дозволяє легко замінювати вендорів та писати ізольовані юніт-тести. |
 
-[SOLID Principles Explained](https://www.baeldung.com/solid-principles)
+---
 
-[SOLID: The First 5 Principles of Object-Oriented Design](https://www.freecodecamp.org/news/solid-principles-explained-in-plain-english/)
+## 🚀 Інструкція із запуску
 
-[JavaScript SOLID: Реалізація принципів](https://khalilstemmler.com/articles/solid-principles/)
+Для розгортання та перевірки тестів:
 
-[Clean Code Concepts Adapted for JavaScript](https://github.com/ryanmcdermott/clean-code-javascript)
-
-[Dependency Injection in JavaScript](https://javascript.plainenglish.io/dependency-injection-in-javascript-1b82a8101c1a)
-
-
-
-
+1. **Встановіть залежності:**
+   ```bash
+   npm install
+   npm test
